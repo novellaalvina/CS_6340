@@ -2,6 +2,9 @@
 
 from sentiment_data import *
 from utils import *
+import string
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 
 from collections import Counter
 
@@ -22,6 +25,13 @@ class FeatureExtractor(object):
         a few indices have nonzero value) in essentially the same way as a map. However, you can use whatever data
         structure you prefer, since this does not interact with the framework code.
         """
+
+        # pre processing of the words: lowercase, remove punctuation and stopwords
+        cleaned = [word.lower() for word in sentence]
+        cleaned = [word.translate(str.maketrans('', '', string.punctuation)) for word in cleaned]
+        stop_words = set(stopwords.words('english'))
+        cleaned = [word for word in cleaned if word not in stop_words]
+
         raise Exception("Don't call me, call my subclasses")
 
 
