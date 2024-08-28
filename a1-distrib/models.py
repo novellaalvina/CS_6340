@@ -1,8 +1,10 @@
 # models.py
 
+from sentiment_data import List
 from sentiment_data import *
 from utils import *
 import string
+import numpy as np
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
@@ -26,12 +28,6 @@ class FeatureExtractor(object):
         structure you prefer, since this does not interact with the framework code.
         """
 
-        # pre processing of the words: lowercase, remove punctuation and stopwords
-        cleaned = [word.lower() for word in sentence]
-        cleaned = [word.translate(str.maketrans('', '', string.punctuation)) for word in cleaned]
-        stop_words = set(stopwords.words('english'))
-        cleaned = [word for word in cleaned if word not in stop_words]
-
         raise Exception("Don't call me, call my subclasses")
 
 
@@ -41,7 +37,40 @@ class UnigramFeatureExtractor(FeatureExtractor):
     and any additional preprocessing you want to do.
     """
     def __init__(self, indexer: Indexer):
-        raise Exception("Must be implemented")
+        self.vocab = indexer
+        # raise Exception("Must be implemented")
+    
+    def extract_features(self, sentence: List[str], add_to_indexer: bool = False) -> Counter:
+
+        print(sentence)
+
+        # pre processing of the words: lowercase, remove punctuation and stopwords
+        sentence = [word.lower() for word in sentence]
+        sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
+        stop_words = set(stopwords.words('english'))
+        sentence = [word for word in sentence if word not in stop_words]
+
+        sentence_vocab = set(sentence)
+        self.vocab.objs_to_ints[sentence_vocab[0]] = 0
+        # vocab_index.objs_to_ints = vocab
+        
+        if (add_to_indexer): # training
+                for word in sentence_vocab:
+                    index = self.vocab.add_and_get_index(word)
+        else: #testing
+            for word in sentence_vocab:
+                if word not in self.vocab: 
+                    sentence.remove(word)
+
+        feature_counter = Counter(sentence)
+
+        feature_vector = np.zeros(len(sentence_vocab), dtype=int)
+
+        for feature in feature_counter.keys():
+            index = self.vocab.index_of(feature)
+            feature_vector[index] = feature_counter[feature]
+
+        return feature_vector
 
 
 class BigramFeatureExtractor(FeatureExtractor):
