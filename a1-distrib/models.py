@@ -38,6 +38,7 @@ class UnigramFeatureExtractor(FeatureExtractor):
     """
     def __init__(self, indexer: Indexer):
         self.vocab = indexer
+        self.feature_vector = ""
         # raise Exception("Must be implemented")
     
     def extract_features(self, sentence: List[str], add_to_indexer: bool = False) -> Counter:
@@ -64,13 +65,15 @@ class UnigramFeatureExtractor(FeatureExtractor):
 
         feature_counter = Counter(sentence)
 
-        feature_vector = np.zeros(len(sentence_vocab), dtype=int)
+        self.feature_vector = np.zeros(len(sentence_vocab), dtype=int)
 
         for feature in feature_counter.keys():
             index = self.vocab.index_of(feature)
-            feature_vector[index] = feature_counter[feature]
+            self.feature_vector[index] = feature_counter[feature]
 
-        return feature_vector
+        print(self.feature_vector)
+
+        return self.feature_vector
 
 
 class BigramFeatureExtractor(FeatureExtractor):
@@ -78,7 +81,49 @@ class BigramFeatureExtractor(FeatureExtractor):
     Bigram feature extractor analogous to the unigram one.
     """
     def __init__(self, indexer: Indexer):
-        raise Exception("Must be implemented")
+        self.vocab = indexer
+        self.feature_vector = ""
+    
+    def extract_features(self, sentence: List[str], add_to_indexer: bool = False) -> Counter:
+
+        # pre processing of the words: lowercase and remove punctuation 
+        sentence = [word.lower() for word in sentence]
+        sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
+        sentence = [word for word in sentence if len(word) > 1 or word != "an"] # remove one letter word including "an"
+
+        # building sentence bigram
+        sentence_bigram = []
+        for i in range(len(sentence)-1):
+            curr = sentence[i] + " " + sentence[i+1]
+            sentence_bigram.append(curr)
+
+        # building sentence vocab
+        current = sentence[0] + " " + sentence[1]
+        self.vocab.objs_to_ints[current] = 0
+        
+        if (add_to_indexer):                                    # training
+            for i in range(len(sentence)-1):
+                current = sentence[i] + " " + sentence[i+1]
+                index = self.vocab.add_and_get_index(current)
+        else:                                                   # testing
+            for i in range(len(sentence)-1):
+                current = sentence[i] + " " + sentence[i+1]
+                if current not in self.vocab: 
+                    sentence.remove(sentence[i])
+                    sentence.remove(sentence[i+1])
+
+        # building feature vector
+        feature_counter = Counter(sentence_bigram)
+
+        self.feature_vector = np.zeros(len(self.vocab.objs_to_ints), dtype=int)
+
+        for bigram in feature_counter.keys():
+            index = self.vocab.index_of(bigram)
+            self.feature_vector[index] = feature_counter[bigram]
+        
+        print(self.feature_vector)
+
+        return self.feature_vector
 
 
 class BetterFeatureExtractor(FeatureExtractor):
