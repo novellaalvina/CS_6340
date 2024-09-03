@@ -1,0 +1,42 @@
+Best results recorded:
+
+(nlp) (base) ➜  a1-distrib git:(main) ✗ python sentiment_classifier.py --model LR --feats UNIGRAM
+[nltk_data] Downloading package stopwords to
+[nltk_data]     /Users/novellaalvina/nltk_data...
+[nltk_data]   Package stopwords is already up-to-date!
+Namespace(model='LR', feats='UNIGRAM', train_path='data/train.txt', dev_path='data/dev.txt', blind_test_path='data/test-blind.txt', test_output_path='test-blind.output.txt', run_on_test=True)
+6920 / 872 / 1821 train/dev/test examples
+=====Train Accuracy=====
+Accuracy: 6721 / 6920 = 0.971243
+Precision (fraction of predicted positives that are correct): 3444 / 3477 = 0.990509; Recall (fraction of true positives predicted correctly): 3444 / 3610 = 0.954017; F1 (harmonic mean of precision and recall): 0.971920
+=====Dev Accuracy=====
+Accuracy: 678 / 872 = 0.777523
+Precision (fraction of predicted positives that are correct): 331 / 412 = 0.803398; Recall (fraction of true positives predicted correctly): 331 / 444 = 0.745495; F1 (harmonic mean of precision and recall): 0.773364
+
+(nlp) (base) ➜  a1-distrib git:(main) ✗ python sentiment_classifier.py --model LR --feats BIGRAM
+[nltk_data] Downloading package stopwords to
+[nltk_data]     /Users/novellaalvina/nltk_data...
+[nltk_data]   Package stopwords is already up-to-date!
+Namespace(model='LR', feats='BIGRAM', train_path='data/train.txt', dev_path='data/dev.txt', blind_test_path='data/test-blind.txt', test_output_path='test-blind.output.txt', run_on_test=True)
+6920 / 872 / 1821 train/dev/test examples
+=====Train Accuracy=====
+Accuracy: 5027 / 6920 = 0.726445
+Precision (fraction of predicted positives that are correct): 2756 / 3795 = 0.726219; Recall (fraction of true positives predicted correctly): 2756 / 3610 = 0.763435; F1 (harmonic mean of precision and recall): 0.744362
+=====Dev Accuracy=====
+Accuracy: 571 / 872 = 0.654817
+Precision (fraction of predicted positives that are correct): 302 / 461 = 0.655098; Recall (fraction of true positives predicted correctly): 302 / 444 = 0.680180; F1 (harmonic mean of precision and recall): 0.667403
+Time for training and evaluation: 8.92 seconds
+
+(nlp) (base) ➜  a1-distrib git:(main) ✗ python sentiment_classifier.py --model LR --feats BETTER
+[nltk_data] Downloading package stopwords to
+[nltk_data]     /Users/novellaalvina/nltk_data...
+[nltk_data]   Package stopwords is already up-to-date!
+Namespace(model='LR', feats='BETTER', train_path='data/train.txt', dev_path='data/dev.txt', blind_test_path='data/test-blind.txt', test_output_path='test-blind.output.txt', run_on_test=True)
+6920 / 872 / 1821 train/dev/test examples
+=====Train Accuracy=====
+Accuracy: 6903 / 6920 = 0.997543
+Precision (fraction of predicted positives that are correct): 3598 / 3603 = 0.998612; Recall (fraction of true positives predicted correctly): 3598 / 3610 = 0.996676; F1 (harmonic mean of precision and recall): 0.997643
+=====Dev Accuracy=====
+Accuracy: 668 / 872 = 0.766055
+Precision (fraction of predicted positives that are correct): 355 / 470 = 0.755319; Recall (fraction of true positives predicted correctly): 355 / 444 = 0.799550; F1 (harmonic mean of precision and recall): 0.776805
+Time for training and evaluation: 6.90 seconds

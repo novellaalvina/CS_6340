@@ -32,7 +32,6 @@ class FeatureExtractor(object):
 
         raise Exception("Don't call me, call my subclasses")
 
-
 class UnigramFeatureExtractor(FeatureExtractor):
     """
     Extracts unigram bag-of-words features from a sentence. It's up to you to decide how you want to handle counts
@@ -45,25 +44,21 @@ class UnigramFeatureExtractor(FeatureExtractor):
     
     def extract_features(self, sentence: List[str], add_to_indexer: bool = False):
 
-        # print("sentence in unigram", sentence)
-
         # pre processing of the words: lowercase, remove punctuation and stopwords
         sentence = [word.lower() for word in sentence]
-        sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
-        stop_words = set(stopwords.words('english'))
-        sentence = [word for word in sentence if word not in stop_words]
+        # sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
+        # stop_words = set(stopwords.words('english'))
+        # sentence = [word for word in sentence if word not in stop_words]
 
         # building vocab unigram
         sentence_vocab = set(sentence)
-        # self.vocab.objs_to_ints[sentence_vocab[0]] = 0
-        # vocab_index.objs_to_ints = vocab
         
         # building vocab and indexing
         if (add_to_indexer):                                            # training
             for word in sentence_vocab:
                 index = self.vocab.add_and_get_index(word)
             return None
-        else:                                                           #testing
+        else:                                                           # testing
             for word in sentence_vocab:
                 if word not in self.vocab.objs_to_ints: 
                     sentence.remove(word)
@@ -71,18 +66,13 @@ class UnigramFeatureExtractor(FeatureExtractor):
         # building word counter from the sentence based on the vocab
         feature_counter = Counter(sentence)
 
+        # building feature vector
         feature_vector = np.zeros(len(self.vocab), dtype=int)
         for feature in feature_counter.keys():
             index = self.vocab.index_of(feature)
             feature_vector[index] = feature_counter[feature]
 
         return feature_vector
-        # print(self.feature_vector)
-
-
-# def build_feature_vector(feature_counter, vocab: Indexer):
-#         # building feature vector
-
 
 class BigramFeatureExtractor(FeatureExtractor):
     """
@@ -92,29 +82,28 @@ class BigramFeatureExtractor(FeatureExtractor):
         self.vocab = indexer
         self.feature_vector = ""
     
-    def extract_features(self, sentence: List[str], add_to_indexer: bool = False) -> Counter:
+    def extract_features(self, sentence: List[str], add_to_indexer: bool = False):
 
         # pre processing of the words: lowercase and remove punctuation 
         sentence = [word.lower() for word in sentence]
-        sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
-        sentence = [word for word in sentence if len(word) > 1 or word != "an"] # remove one letter word including "an"
+        # sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
+        # sentence = [word for word in sentence if len(word) > 1 or word != "an"] # remove one letter word including "an"
 
         # building vocab bigram
-        sentence_bigram = {}
-        current = sentence[0] + " " + sentence[1]
-        self.vocab.objs_to_ints[current] = 0
+        sentence_bigram = []
+        for i in range(len(sentence)-1):
+            current = sentence[i] + " " + sentence[i+1]
+            sentence_bigram.append(current)
 
         # building vocab index
-        if (add_to_indexer):                                    # training
-            for i in range(len(sentence)-1):
-                current = sentence[i] + " " + sentence[i+1]
-                index = self.vocab.add_and_get_index(current)
-        else:                                                   # testing
-            for i in range(len(sentence)-1):
-                current = sentence[i] + " " + sentence[i+1]
-                if current not in self.vocab: 
-                    sentence.remove(sentence[i])
-                    sentence.remove(sentence[i+1])
+        if (add_to_indexer):                                            # training
+            for word in sentence_bigram:
+                index = self.vocab.add_and_get_index(word)
+            return None
+        else:                                                           # testing
+            for word in sentence_bigram:
+                if word not in self.vocab.objs_to_ints: 
+                    sentence_bigram.remove(word)
 
         # building word counter from the sentence based on the vocab
         feature_counter = Counter(sentence_bigram)
@@ -127,14 +116,66 @@ class BigramFeatureExtractor(FeatureExtractor):
         
         return self.feature_vector
 
-
 class BetterFeatureExtractor(FeatureExtractor):
     """
     Better feature extractor...try whatever you can think of!
     """
     def __init__(self, indexer: Indexer):
-        raise Exception("Must be implemented")
+        self.vocab = indexer
+        self.feature_vector = ""
+        self.document_frequency = {}
+        self.docs_num = 0
+        # raise Exception("Must be implemented")
 
+    def extract_features(self, sentence: List[str], add_to_indexer: bool = False):
+        
+        # # pre processing of the words: lowercase, remove punctuation and stopwords
+        sentence = [word.lower() for word in sentence]
+        sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
+        stop_words = set(stopwords.words('english'))
+        sentence = [word for word in sentence if word not in stop_words]
+
+        # building term frequencies 
+        # number of times a token(i.e word) occured in document(i.e sentence)
+        term_freq = {}
+        for word in sentence:
+            if word in term_freq:
+                term_freq[word] += 1
+            else:
+                term_freq[word] = 1
+        
+        # building document frequencies
+        # number of times a token(i.e word) occured in the whole dataset(i.e N documents)
+        sentence_vocab = set(sentence)
+        for word in sentence_vocab:
+            if word in self.document_frequency.keys():
+                self.document_frequency[word] += 1
+            else:
+                self.document_frequency[word] = 1
+                if (add_to_indexer):
+                    self.vocab.add_and_get_index(word)
+                else:
+                    if word not in self.vocab.objs_to_ints:
+                        sentence.remove(word)
+
+        # building inverse document frequencies 
+        # number of documents N / document frequency
+        idf_vector = {}
+        self.docs_num += 1  # total number of documents processed so far
+        for word in sentence:
+            idf = np.log(self.docs_num / self.document_frequency[word])
+            idf_vector[word] = idf
+
+        # building tf-idf 
+        feature_vector = np.zeros(len(self.vocab), dtype=int)
+        for word in sentence:
+            if word in self.vocab.objs_to_ints:
+                index = self.vocab.index_of(word)
+                tf_idf = term_freq[word] * idf_vector[word]
+                feature_vector[index] = tf_idf
+
+        return feature_vector
+    
 class SentimentClassifier(object):
     """
     Sentiment classifier base type
@@ -166,11 +207,10 @@ class LogisticRegressionClassifier(SentimentClassifier):
 
     def predict(self, sentence: List[str]) -> int:
         feature_vector = self.feature_extractor.extract_features(sentence, False)
-        # feature_vector = eature_vector(feature_counter, sentence)
 
-        sigmoid_classification_func = 1 / (1+ np.exp(-np.dot(feature_vector, self.weight)))
-        if sigmoid_classification_func > 0.5:
-            return 1
+        # classification function (sigmoid_classification_func)
+        probability_y_given_x = 1 / (1 + np.exp(-np.dot(feature_vector, self.weight)))
+        if probability_y_given_x > 0.5: return 1
         else: return 0
 
 def train_logistic_regression(train_exs: List[SentimentExample], feat_extractor: FeatureExtractor) -> LogisticRegressionClassifier:
@@ -183,25 +223,21 @@ def train_logistic_regression(train_exs: List[SentimentExample], feat_extractor:
 
     epoch = 10
     learning_rate_alpha = 0.1
-    # weights = np.zeros(len(train_exs[0].words))
 
-    # get vocab shape
-    first_vocab = [feat_extractor.extract_features(ex.words, True) for ex in train_exs]
+    # get vocab and its shape
+    vocab = [feat_extractor.extract_features(ex.words, True) for ex in train_exs]
     num_features = len(feat_extractor.vocab)
     weights = np.zeros(num_features)
-
-    print("num feat", num_features)    
-    print("weight", weights.shape)
 
     for t in range(epoch):
        random.shuffle(train_exs)
        for ex in train_exs:
            sentence = set(ex.words)
            sentence_label = ex.label
-           feature_vector = feat_extractor.extract_features(sentence, False)
+           feature_vector = feat_extractor.extract_features(sentence, False) # add_to_indexer = False because we have build the vocab in line 178
 
            # classification function (sigmoid_classification_func)
-           probability_y_given_x = 1 / (1+ np.exp(np.dot(feature_vector, weights))) # y = 1
+           probability_y_given_x = 1 / (1+ np.exp(-np.dot(feature_vector, weights))) # y = 1
 
            # loss_func = -np.log(probability_y_given_x)
            # objective function to optimize model parameter
@@ -210,12 +246,12 @@ def train_logistic_regression(train_exs: List[SentimentExample], feat_extractor:
            if sentence_label == 1:
                 # min {neg log likelihood of the probability(y|w,x)} = min {loss func} -> gradient descent
                 # compute gradient derivative of w of the loss func L(x_i, y_i, w) with respect to w
-                dw = feature_vector * (1-probability_y_given_x - sentence_label)  
+                dw = feature_vector * (probability_y_given_x-1)                                          # if y = 1: dw = f(x) (P(y=1|x) - 1)
 
            else:
                 # min {neg log likelihood of the probability(y|w,x)} = min {loss func} -> gradient descent
                 # compute gradient derivative of w of the loss func L(x_i, y_i, w) with respect to w
-                dw = feature_vector * (1-probability_y_given_x)   
+                dw = feature_vector * (probability_y_given_x)                                         # if y = 0: dw = f(x) (1 - P(y=0|x))
 
         #    dw = feature_vector * (1-sigmoid_classification_func - sentence_label)   
            
