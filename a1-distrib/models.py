@@ -3,7 +3,8 @@
 from sentiment_data import List
 from sentiment_data import *
 from utils import *
-import string
+# import string
+# import spacy
 import random
 import numpy as np
 import nltk
@@ -40,15 +41,11 @@ class UnigramFeatureExtractor(FeatureExtractor):
     def __init__(self, indexer: Indexer):
         self.vocab = indexer
         self.feature_vector = ""
-        # raise Exception("Must be implemented")
     
     def extract_features(self, sentence: List[str], add_to_indexer: bool = False):
 
         # pre processing of the words: lowercase, remove punctuation and stopwords
         sentence = [word.lower() for word in sentence]
-        # sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
-        # stop_words = set(stopwords.words('english'))
-        # sentence = [word for word in sentence if word not in stop_words]
 
         # building vocab unigram
         sentence_vocab = set(sentence)
@@ -86,8 +83,6 @@ class BigramFeatureExtractor(FeatureExtractor):
 
         # pre processing of the words: lowercase and remove punctuation 
         sentence = [word.lower() for word in sentence]
-        # sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
-        # sentence = [word for word in sentence if len(word) > 1 or word != "an"] # remove one letter word including "an"
 
         # building vocab bigram
         sentence_bigram = []
@@ -125,13 +120,12 @@ class BetterFeatureExtractor(FeatureExtractor):
         self.feature_vector = ""
         self.document_frequency = {}
         self.docs_num = 0
-        # raise Exception("Must be implemented")
 
     def extract_features(self, sentence: List[str], add_to_indexer: bool = False):
         
         # # pre processing of the words: lowercase, remove punctuation and stopwords
         sentence = [word.lower() for word in sentence]
-        sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
+        # sentence = [word.translate(str.maketrans('', '', string.punctuation)) for word in sentence]
         stop_words = set(stopwords.words('english'))
         sentence = [word for word in sentence if word not in stop_words]
 
