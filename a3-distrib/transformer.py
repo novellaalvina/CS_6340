@@ -38,19 +38,59 @@ class Transformer(nn.Module):
         :param num_classes: number of classes predicted at the output layer; should be 3
         :param num_layers: number of TransformerLayers to use; can be whatever you want
         """
-        self.d_model = d_model
-        print("dimension transformer", self.d_model)
         super().__init__()
-        raise Exception("Implement me")
+        
+        self.d_model = d_model
+        self.vocab_size = vocab_size
+        self.num_positions = num_positions
+        self.d_internal = d_internal
+        self.num_classes = num_classes
+        self.num_layers = num_layers
+        
+        self.embedding = nn.Embedding(self.vocab_size, self.d_model)
+        self.positional_encoding = PositionalEncoding(self.d_model, self.num_positions)
+        self.transformer_layer = TransformerLayer(self.d_model, self.d_internal)    
+        
+        self.W = nn.Linear(d_model, num_classes)
+        self.V = nn.Linear(d_model, d_internal)
+        nn.init.xavier_uniform_(self.W.weight)
+        nn.init.xavier_uniform_(self.V.weight)
+        
+        # raise Exception("Implement me")
 
     def forward(self, indices):
         """
-
         :param indices: list of input indices
         :return: A tuple of the softmax log probabilities (should be a 20x3 matrix) and a list of the attention
         maps you use in your layers (can be variable length, but each should be a 20x20 matrix)
         """
-        raise Exception("Implement me")
+        
+        """Building the Transformer will involve: 
+            (1) adding positional encodings to the input (see the PositionalEncoding class; but we recommend leaving these out for now); 
+            (2) using one or more of your TransformerLayers; 
+            (3) using Linear and softmax layers to make the prediction. Different from Assignment 2, you are simultaneously making predictions over each position in the sequence. Your network should return the log probabilities at the output layer (a 20x3 matrix) as well as the attentions you compute, which are then plotted for you for visualization purposes in plots/."""
+            
+        # (1) adding positional encodings to the input
+        """ (see the PositionalEncoding class; but we recommend leaving these out for now) """        
+        input_embedding = self.embedding(indices)
+        input_positional_encoding = self.positional_encoding(input_embedding)
+        
+        # (2) using one or more of your TransformerLayers
+        attention_maps = []
+        output_layer, attention_map = self.transformer_layer.forward(input_positional_encoding)
+        attention_maps.append(attention_map)
+        
+        for i in range(self.num_layers-1):
+            output_layer, attention_map = self.transformer_layer.forward(output_layer)
+            attention_maps.append(attention_map)
+            
+        # (3) using Linear and softmax layers to make the prediction.
+        linear = self.W(output_layer)
+        log_prob_softmax = nn.LogSoftmax(dim=-1)(linear)
+        
+        return log_prob_softmax, attention_maps
+    
+        # raise Exception("Implement me")
 
 
 # Your implementation of the Transformer layer goes here. It should take vectors and return the same number of vectors
@@ -63,24 +103,23 @@ class TransformerLayer(nn.Module):
         :param d_internal: The "internal" dimension used in the self-attention computation. Your keys and queries
         should both be of this length.
         """
+        super().__init__()
+
         self.d_model = d_model
         self.d_internal = d_internal
-        
+        print("dmodel and dinternal transformer layer", d_model, d_internal)
         self.w_Q = nn.Linear(d_model, d_internal)
         self.w_K = nn.Linear(d_model, d_internal)
-        self.w_V = nn.Linear(d_model, d_internal)
+        self.w_V = nn.Linear(d_model, d_model)
         
         nn.init.xavier_uniform_(self.w_Q.weight)
         nn.init.xavier_uniform_(self.w_K.weight)
         nn.init.xavier_uniform_(self.w_V.weight)
         
-        self.softmax = nn.Softmax(dim=-1)
-
         self.w1 = nn.Linear(d_model, d_internal)
         self.w2 = nn.Linear(d_internal, d_model)
         
-        super().__init__()
-        raise Exception("Implement me")
+        # raise Exception("Implement me")
 
     def forward(self, input_vecs):
         
@@ -90,19 +129,20 @@ class TransformerLayer(nn.Module):
         K = self.w_K(input_vecs)
         V = self.w_V(input_vecs)
         
-        softmax_scores = torch.matmul(Q, torch.transpose(K)) / np.sqrt(self.d_internal)
-        A = torch.matmul(nn.Softmax(softmax_scores), V)
+        softmax_scores = torch.matmul(Q, torch.transpose(K, 0, 1)) / np.sqrt(self.d_internal)
+        attention_softmax = nn.functional.softmax(softmax_scores, dim=-1)
+        A = torch.matmul(attention_softmax, V)
         
         # (2) residual connection
         z = A + input_vecs
         
         # (3) Linear layer, nonlinearity, and Linear layer (feedforward)"""
-        feedforward = self.w2(nn.GELU(self.w1(z)))
+        feedforward = self.w2(nn.GELU()(self.w1(z)))
         
         # (4) final residual connection
         output = feedforward + z
         
-        return output
+        return output, attention_softmax
         
         # raise Exception("Implement me")
 
@@ -147,26 +187,34 @@ def train_classifier(args, train, dev):
     # The following code DOES NOT WORK but can be a starting point for your implementation
     # Some suggested snippets to use:
     
-    print(train[0].input_tensor)
-    print("Input Tensor Shape:", train[0].input_tensor.shape)
-    emb = nn.Embedding(27,20)
-    output = emb(train[0].input_tensor)
+    # print(train[0].input_tensor)
+    # print("Input Tensor Shape:", train[0].input_tensor.shape)
+    # emb = nn.Embedding(27,20)
+    # output = emb(train[0].input_tensor)
     
-    print("Output Tensor Shape:", output.shape)
-    translayer = TransformerLayer(20,27)
-    print(translayer.forward(output))
-    model = Transformer(27,20,20,27,3,1)
-    output = model.forward(train[0].input_tensor)
-    print(output[0].shape)
-    vocab_size, num_positions, d_model, d_internal, num_classes, num_layers
-    
-    d_model = train[0].input_tensor.shape
+    # print("Output Tensor Shape:", output.shape)
+    # translayer = TransformerLayer(20,27)
+    # print(translayer.forward(output))
+    # # model = Transformer(27,20,20,27,3,1)
+    # # output = model.forward(train[0].input_tensor)
+    # print(output[0].shape)
+    # vocab_size, num_positions, d_model, d_internal, num_classes, num_layers
+
+    d_model = train[0].input_tensor.shape[0]
     d_internal = 27
+    vocab_size = 27
+    num_positions = train[0].input_tensor.shape[0]
+    num_classes = 3
+    num_layers = 2
     
-    transformer_layer = TransformerLayer(d_model, d_internal)
+    # emb = nn.Embedding(27,20)
+    # output = emb(train[0].input_tensor)
+    # transformer_layer = TransformerLayer(d_model, d_internal)
+    # transformer_layer_output = transformer_layer.forward(output)
+    # print(transformer_layer_output[0].shape)
     
-    
-    model = Transformer(27,20,100,100,3,2)
+    # model = Transformer(27,20,100,100,3,2)
+    model = Transformer(vocab_size, num_positions, d_model, d_internal, num_classes, num_layers)
     model.zero_grad()
     model.train()
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
@@ -180,10 +228,11 @@ def train_classifier(args, train, dev):
         random.shuffle(ex_idxs)
         loss_fcn = nn.NLLLoss()
         for ex_idx in ex_idxs:
-            loss = loss_fcn(...) # TODO: Run forward and compute loss
-            # model.zero_grad()
-            # loss.backward()
-            # optimizer.step()
+            # TODO: Run forward and compute loss
+            loss = loss_fcn(model.forward(train[ex_idx].input_tensor)[0], train[ex_idx].output_tensor)
+            model.zero_grad()
+            loss.backward()
+            optimizer.step()
             loss_this_epoch += loss.item()
     model.eval()
     return model
