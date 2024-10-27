@@ -186,19 +186,6 @@ def train_classifier(args, train, dev):
 
     # The following code DOES NOT WORK but can be a starting point for your implementation
     # Some suggested snippets to use:
-    
-    # print(train[0].input_tensor)
-    # print("Input Tensor Shape:", train[0].input_tensor.shape)
-    # emb = nn.Embedding(27,20)
-    # output = emb(train[0].input_tensor)
-    
-    # print("Output Tensor Shape:", output.shape)
-    # translayer = TransformerLayer(20,27)
-    # print(translayer.forward(output))
-    # # model = Transformer(27,20,20,27,3,1)
-    # # output = model.forward(train[0].input_tensor)
-    # print(output[0].shape)
-    # vocab_size, num_positions, d_model, d_internal, num_classes, num_layers
 
     d_model = train[0].input_tensor.shape[0]
     d_internal = 27
@@ -207,13 +194,6 @@ def train_classifier(args, train, dev):
     num_classes = 3
     num_layers = 2
     
-    # emb = nn.Embedding(27,20)
-    # output = emb(train[0].input_tensor)
-    # transformer_layer = TransformerLayer(d_model, d_internal)
-    # transformer_layer_output = transformer_layer.forward(output)
-    # print(transformer_layer_output[0].shape)
-    
-    # model = Transformer(27,20,100,100,3,2)
     model = Transformer(vocab_size, num_positions, d_model, d_internal, num_classes, num_layers)
     model.zero_grad()
     model.train()
