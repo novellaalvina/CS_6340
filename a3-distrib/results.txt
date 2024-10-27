@@ -1,0 +1,57 @@
+Part 1:
+
+(nlp) (base) ➜  a3-distrib git:(main) ✗ python letter_counting.py --train data/lettercounting-train.txt
+Namespace(task='BEFORE', train='data/lettercounting-train.txt', dev='data/lettercounting-dev.txt', output_bundle_path='classifier-output.json')
+['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ' ']
+10000 lines read in
+1000 lines read in
+dmodel and dinternal transformer layer 20 27
+INPUT 0: heir average albedo 
+GOLD 0: array([0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 2, 1, 2, 0, 0, 2, 0, 0, 2])
+PRED 0: array([0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 2, 1, 2, 0, 0, 2, 0, 0, 2])
+INPUT 1: ed by rank and file 
+GOLD 1: array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 1, 2])
+PRED 1: array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 1, 2])
+INPUT 2: s can also extend in
+GOLD 2: array([0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 0, 1, 1, 0, 2, 0, 2])
+PRED 2: array([0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 0, 1, 1, 0, 2, 0, 2])
+INPUT 3: erages between nine 
+GOLD 3: array([0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 2, 2, 0, 1, 1, 0, 2, 2, 2])
+PRED 3: array([0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 2, 2, 0, 1, 1, 0, 1, 2, 2])
+INPUT 4:  that civilization n
+GOLD 4: array([0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 2, 0, 1, 2, 2, 0, 0, 2, 1])
+PRED 4: array([0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 2, 0, 1, 2, 2, 0, 0, 2, 1])
+Accuracy: 99 / 100 = 0.990000
+Training accuracy (100 exs):
+Accuracy: 1931 / 2000 = 0.965500
+Dev accuracy (whole set):
+Decoding on a large number of examples (1000); not printing or plotting
+Accuracy: 19363 / 20000 = 0.968150
+
+(nlp) (base) ➜  a3-distrib git:(main) ✗ python letter_counting.py --train data/lettercounting-train.txt
+Namespace(task='BEFORE', train='data/lettercounting-train.txt', dev='data/lettercounting-dev.txt', output_bundle_path='classifier-output.json')
+['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ' ']
+10000 lines read in
+1000 lines read in
+dmodel and dinternal transformer layer 100 100
+INPUT 0: heir average albedo 
+GOLD 0: array([0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 2, 1, 2, 0, 0, 2, 0, 0, 2])
+PRED 0: array([0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 2, 1, 2, 0, 0, 2, 0, 0, 2])
+INPUT 1: ed by rank and file 
+GOLD 1: array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 1, 2])
+PRED 1: array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 1, 2])
+INPUT 2: s can also extend in
+GOLD 2: array([0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 0, 1, 1, 0, 2, 0, 2])
+PRED 2: array([0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 0, 1, 1, 0, 2, 0, 2])
+INPUT 3: erages between nine 
+GOLD 3: array([0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 2, 2, 0, 1, 1, 0, 2, 2, 2])
+PRED 3: array([0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 2, 2, 0, 1, 1, 0, 2, 2, 2])
+INPUT 4:  that civilization n
+GOLD 4: array([0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 2, 0, 1, 2, 2, 0, 0, 2, 1])
+PRED 4: array([0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 2, 0, 1, 2, 2, 0, 0, 2, 1])
+Accuracy: 100 / 100 = 1.000000
+Training accuracy (100 exs):
+Accuracy: 1999 / 2000 = 0.999500
+Dev accuracy (whole set):
+Decoding on a large number of examples (1000); not printing or plotting
+Accuracy: 19988 / 20000 = 0.999400
