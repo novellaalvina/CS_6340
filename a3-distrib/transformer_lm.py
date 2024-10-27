@@ -78,8 +78,10 @@ class NeuralLanguageModel(LanguageModel):
         
     def forward(self, indices):
         
-        # positional encoding
+        # embedding
         input_embedding = self.embedding(indices)
+
+        # positional encoding
         input_positional_encoding = self.positional_encoding.forward(input_embedding)
 
         # masking 
@@ -92,7 +94,7 @@ class NeuralLanguageModel(LanguageModel):
         transformer_encoder_output = self.transformer_encoder.forward(src=(input_positional_encoding), mask=input_mask, is_causal=True)
 
         # linear and log softmax
-        log_softmax = nn.functional.log_softmax(input=self.W(transformer_encoder_output), dim=-1, dtype=torch.float)
+        log_softmax = nn.functional.log_softmax(input=self.W(transformer_encoder_output), dim=-1, dtype=torch.float64)
         
         return log_softmax
                 
@@ -118,7 +120,7 @@ class NeuralLanguageModel(LanguageModel):
         
         self.transformer_encoder.eval()
         
-        return log_probs
+        return np.float64(log_probs)
 
     def get_log_prob_sequence(self, next_chars, context):
         
@@ -156,7 +158,6 @@ def train_lm(args, train_text, dev_text, vocab_index):
     :param vocab_index: an Indexer of the character vocabulary (27 characters)
     :return: a NeuralLanguageModel instance trained on the given data
     """  
-    
     vocab_size = len(vocab_index)
     d_model = 500
     chunk_size = 200
@@ -171,13 +172,12 @@ def train_lm(args, train_text, dev_text, vocab_index):
         train_context.append(train_text[i*chunk_size:(i+1)*chunk_size])
         gold.append(train_text[i*chunk_size+1:(i+1)*chunk_size+1])
     
-    # model = NeuralLanguageModel(27,500,chunk_size,500,2, 10,dropout=0.1,vocab_index=vocab_index)
     model = NeuralLanguageModel(vocab_size, d_model, num_positions, nhead, num_layers, dropout, vocab_index)
     model.transformer_encoder.zero_grad()
     model.transformer_encoder.train()
     optimizer = optim.Adam(model.transformer_encoder.parameters(), lr=1e-4)
 
-    num_epochs = 5
+    num_epochs = 3
     for t in range(0, num_epochs):
         loss_this_epoch = 0.0
         random.seed(t)
